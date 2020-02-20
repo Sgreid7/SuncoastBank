@@ -1,0 +1,3 @@
+-- Create a checkings and savings account for user
+-- User should be able to deposit money to both accounts, withdraw and or transfer money between them
+-- store information in a csv file
