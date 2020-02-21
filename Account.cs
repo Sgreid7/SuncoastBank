@@ -3,7 +3,6 @@ namespace SuncoastBank
   public class Account
   {
     // ***** PROPERTIES *****
-
     // Account name : Checkings or Savings
     public string Name { get; set; }
 

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using CsvHelper;
 
 namespace SuncoastBank
 {
@@ -19,6 +21,7 @@ namespace SuncoastBank
     public int AccountNumberID { get; set; } = 1;
 
     // ***** METHODS *****
+    // CREATE ACCOUNT
     public void AddAccount(string name, double balance)
     {
       var account = new Account()
@@ -31,6 +34,7 @@ namespace SuncoastBank
       AccountNumberID++;
     }
 
+    // DISPLAY ACCOUNTS
     public void ShowAccounts()
     {
       foreach (var account in Accounts)
@@ -46,21 +50,28 @@ namespace SuncoastBank
     // Method to deposit money in account
     public void Deposit(int accountNum, double amount)
     {
-      Accounts.First(account => account.AccountNumber == accountNum).Balance += amount;
+      Accounts.First(acc => acc.AccountNumber == accountNum).Balance += amount;
     }
 
     // Method to withdraw money from account
     public void Withdraw(int accountNum, double amount)
     {
-      Accounts.First(account => account.AccountNumber == accountNum).Balance -= amount;
+      Accounts.First(acc => acc.AccountNumber == accountNum).Balance -= amount;
     }
 
+    // TRANSFER
     public void Transfer(int accountNumToTransferFrom, int accountNumToTransferTo, double amount)
     {
       Withdraw(accountNumToTransferFrom, amount);
       Deposit(accountNumToTransferTo, amount);
     }
 
+    // REMOVE ACCOUNT
+    public void RemoveAccount(int accountNum)
+    {
+      var accountToRemove = Accounts.First(acc => acc.AccountNumber == accountNum);
+      Accounts.Remove(accountToRemove);
+    }
 
   }
 }
