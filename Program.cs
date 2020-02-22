@@ -10,37 +10,37 @@ namespace SuncoastBank
 {
   class Program
   {
+    // SAVE DATA
+    static void SaveData(Bank bank)
+    {
+      // var writer = new StreamWriter("bankData.csv");
+      // var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
+      // csvWriter.WriteRecords(Users);
+      // writer.Flush();
+      string json = JsonConvert.SerializeObject(bank);
+      System.IO.File.WriteAllText(@"bankData.txt", json);
+    }
+
     static void Main(string[] args)
     {
       var bank = new Bank();
-      var currentUser = new User();
-      var user = new User();
-      user.UserName = "Sam123";
-      user.Password = "taco123";
-      bank.Users.Add(user);
-      var errorMessage = $"Apologies, {user.UserName}, that is not a valid input. Please try again.";
+      bank = JsonConvert.DeserializeObject<Bank>(File.ReadAllText(@"bankData.txt"));
+      var currentUser = bank.Users[0];
+      // var user = new User();
+      // user.UserName = "Sam123";
+      // user.Password = "taco123";
+      // bank.Users.Add(user);
+      var errorMessage = $"Apologies, that is not a valid input. Please try again.";
       // Add test cases
-      user.AddAccount("Savings", 50.50);
-      user.AddAccount("Checkings", 100.50);
+      // user.AddAccount("Savings", 50.50);
+      // user.AddAccount("Checkings", 100.50);
 
       // var loggedIn = false;
       // while (loggedIn) {
 
       // }
-
-      // SAVE DATA
-      static void SaveData(Bank bank)
-      {
-        // var writer = new StreamWriter("bankData.csv");
-        // var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-        // csvWriter.WriteRecords(Users);
-        // writer.Flush();
-        string json = JsonConvert.SerializeObject(bank);
-        System.IO.File.WriteAllText(@"bankData.txt", json);
-      }
-
-      bank = JsonConvert.DeserializeObject<Bank>(File.ReadAllText(@"bankData.txt"));
       // READ THE DATA
+
       // var reader = new StreamReader("bankData.csv");
       // var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
       // bank.Users = csvReader.GetRecords<User>().ToList();
@@ -48,8 +48,11 @@ namespace SuncoastBank
       var isRunning = true;
       while (isRunning)
       {
+        // ask user to login or sign up
+        System.Console.WriteLine("Greetings, would you like to (LOGIN) or (SIGN-UP)?");
+
         // Display different accounts to user
-        user.ShowAccounts();
+        currentUser.ShowAccounts();
         // Ask user what they would like to do
         Console.WriteLine("What would you like to do today?");
         Console.WriteLine("(DEPOSIT 'd'), (WITHDRAW 'w'), (TRANSFER 't'), (USER 'u') settings, or (QUIT 'q')");
@@ -64,13 +67,13 @@ namespace SuncoastBank
           case "d":
             Console.WriteLine("Please select an account to deposit to:");
             // Refresh the user which accounts there are currently
-            user.ShowAccounts();
+            currentUser.ShowAccounts();
             // Initialize variable result 
             int depositAccount;
             // take in user input, parse to double, and output the result to the variable above as a double
             int.TryParse(Console.ReadLine(), out depositAccount);
             // VALIDATE to make sure account number exists
-            while (!user.Accounts.Any(acc => acc.AccountNumber == depositAccount))
+            while (!currentUser.Accounts.Any(acc => acc.AccountNumber == depositAccount))
             {
               Console.WriteLine(errorMessage);
               int.TryParse(Console.ReadLine(), out depositAccount);
@@ -79,7 +82,7 @@ namespace SuncoastBank
             Console.WriteLine();
 
             // Ask user how much to deposit
-            Console.WriteLine($"How much would you like to deposit in {user.Accounts.First(acc => acc.AccountNumber == depositAccount).Name}?");
+            Console.WriteLine($"How much would you like to deposit in {currentUser.Accounts.First(acc => acc.AccountNumber == depositAccount).Name}?");
             // Initialize variable result 
             double amountToDeposit;
             // take in user input, parse to double, and output the result to the variable above as a double
@@ -91,8 +94,8 @@ namespace SuncoastBank
               double.TryParse(Console.ReadLine(), out amountToDeposit);
             }
             // Call method to deposit money into account
-            user.Deposit(depositAccount, amountToDeposit);
-            Console.WriteLine($"You have successfully deposited ${amountToDeposit} into your {user.Accounts.First(acc => acc.AccountNumber == depositAccount).Name} account.");
+            currentUser.Deposit(depositAccount, amountToDeposit);
+            Console.WriteLine($"You have successfully deposited ${amountToDeposit} into your {currentUser.Accounts.First(acc => acc.AccountNumber == depositAccount).Name} account.");
             // Save data to file 
             SaveData(bank);
             break;
@@ -100,12 +103,12 @@ namespace SuncoastBank
           // * * * * * W I T H D R A W * * * * *
           case "w":
             Console.WriteLine("Please select an account to withdraw from:");
-            user.ShowAccounts();
+            currentUser.ShowAccounts();
             // Initialize variable
             int withdrawAccount;
             int.TryParse(Console.ReadLine(), out withdrawAccount);
 
-            while (!user.Accounts.Any(acc => acc.AccountNumber == withdrawAccount))
+            while (!currentUser.Accounts.Any(acc => acc.AccountNumber == withdrawAccount))
             {
               Console.WriteLine(errorMessage);
               int.TryParse(Console.ReadLine(), out depositAccount);
@@ -113,21 +116,21 @@ namespace SuncoastBank
 
             Console.WriteLine();
             // Ask user how much to deposit
-            Console.WriteLine($"How much would you like to withdraw from {user.Accounts.First(acc => acc.AccountNumber == withdrawAccount).Name}?");
+            Console.WriteLine($"How much would you like to withdraw from {currentUser.Accounts.First(acc => acc.AccountNumber == withdrawAccount).Name}?");
             // Initialize variable result 
             double amountToWithdraw;
             // take in user input, parse to double, and output the result variable above as a double
             double.TryParse(Console.ReadLine(), out amountToWithdraw);
 
-            while (amountToWithdraw <= 0 || amountToWithdraw > user.Accounts.First(acc => acc.AccountNumber == withdrawAccount).Balance)
+            while (amountToWithdraw <= 0 || amountToWithdraw > currentUser.Accounts.First(acc => acc.AccountNumber == withdrawAccount).Balance)
             {
               Console.WriteLine(errorMessage);
               double.TryParse(Console.ReadLine(), out amountToWithdraw);
             }
 
             // Call method to withdraw amount from account
-            user.Withdraw(withdrawAccount, amountToWithdraw);
-            Console.WriteLine($"You have successfully withdrew ${amountToWithdraw} from your {user.Accounts.First(acc => acc.AccountNumber == withdrawAccount).Name} account.");
+            currentUser.Withdraw(withdrawAccount, amountToWithdraw);
+            Console.WriteLine($"You have successfully withdrew ${amountToWithdraw} from your {currentUser.Accounts.First(acc => acc.AccountNumber == withdrawAccount).Name} account.");
             // Save data to file 
             SaveData(bank);
             break;
@@ -136,11 +139,11 @@ namespace SuncoastBank
           case "t":
             // ***** ASK USER WHICH ACCOUNT TO TRANSFER FROM
             Console.WriteLine("Please select an account to transfer from:");
-            user.ShowAccounts();
+            currentUser.ShowAccounts();
             int transferAccount;
             int.TryParse(Console.ReadLine(), out transferAccount);
             // VALIDATE INPUT
-            while (!user.Accounts.Any(acc => acc.AccountNumber == transferAccount))
+            while (!currentUser.Accounts.Any(acc => acc.AccountNumber == transferAccount))
             {
               Console.WriteLine(errorMessage);
               int.TryParse(Console.ReadLine(), out transferAccount);
@@ -149,11 +152,11 @@ namespace SuncoastBank
 
             // **** WHICH ACCOUNT TO TRANSFER TO *****
             Console.WriteLine("Please select an account to transfer to:");
-            user.ShowAccounts();
+            currentUser.ShowAccounts();
             int incomingAccount;
             int.TryParse(Console.ReadLine(), out incomingAccount);
             // VALIDATE INPUT
-            while (!user.Accounts.Any(acc => acc.AccountNumber == incomingAccount) || transferAccount == incomingAccount)
+            while (!currentUser.Accounts.Any(acc => acc.AccountNumber == incomingAccount) || transferAccount == incomingAccount)
             {
               Console.WriteLine(errorMessage);
               int.TryParse(Console.ReadLine(), out incomingAccount);
@@ -161,20 +164,20 @@ namespace SuncoastBank
             Console.WriteLine();
 
             // Ask user how much to deposit
-            Console.WriteLine($"How much would you like to transfer from {user.Accounts.First(acc => acc.AccountNumber == transferAccount).Name} to {user.Accounts.First(acc => acc.AccountNumber == incomingAccount).Name}?");
+            Console.WriteLine($"How much would you like to transfer from {currentUser.Accounts.First(acc => acc.AccountNumber == transferAccount).Name} to {currentUser.Accounts.First(acc => acc.AccountNumber == incomingAccount).Name}?");
             // Initialize variable result 
             double amountToTransfer;
             // take in user input, parse to double, and output the result variable above as a double
             double.TryParse(Console.ReadLine(), out amountToTransfer);
 
-            while (amountToTransfer <= 0 || amountToTransfer > user.Accounts.First(acc => acc.AccountNumber == transferAccount).Balance)
+            while (amountToTransfer <= 0 || amountToTransfer > currentUser.Accounts.First(acc => acc.AccountNumber == transferAccount).Balance)
             {
               Console.WriteLine(errorMessage);
               double.TryParse(Console.ReadLine(), out amountToTransfer);
             }
             // Call method to transfer
-            user.Transfer(transferAccount, incomingAccount, amountToTransfer);
-            Console.WriteLine($"You have successfully transferred ${amountToTransfer} from your {user.Accounts.First(acc => acc.AccountNumber == transferAccount).Name} account into your {user.Accounts.First(acc => acc.AccountNumber == incomingAccount).Name}.");
+            currentUser.Transfer(transferAccount, incomingAccount, amountToTransfer);
+            Console.WriteLine($"You have successfully transferred ${amountToTransfer} from your {currentUser.Accounts.First(acc => acc.AccountNumber == transferAccount).Name} account into your {currentUser.Accounts.First(acc => acc.AccountNumber == incomingAccount).Name}.");
             // Save data to file 
             SaveData(bank);
             break;
@@ -196,7 +199,7 @@ namespace SuncoastBank
               case "a":
                 // Add space
                 System.Console.WriteLine();
-                Console.WriteLine($"{user.UserName}, you have chosen to add an account.");
+                Console.WriteLine($"{currentUser.UserName}, you have chosen to add an account.");
                 Console.WriteLine("What type of account would you like to add?");
                 Console.WriteLine("(CHECKINGS) or (SAVINGS)?");
                 var newAccount = Console.ReadLine().ToUpper();
@@ -221,12 +224,12 @@ namespace SuncoastBank
                 if (newAccount == "CHECKINGS")
                 {
                   // Create the account and deposit the amount
-                  user.AddAccount(newAccount, amount);
+                  currentUser.AddAccount(newAccount, amount);
                 }
                 else if (newAccount == "SAVINGS")
                 {
                   // Create the account and deposit the amount
-                  user.AddAccount(newAccount, amount);
+                  currentUser.AddAccount(newAccount, amount);
                 }
                 // Save data to file 
                 SaveData(bank);
@@ -236,36 +239,36 @@ namespace SuncoastBank
               case "x":
                 // Add space
                 System.Console.WriteLine();
-                Console.WriteLine($"{user.UserName}, you have chosen to close an account.");
+                Console.WriteLine($"{currentUser.UserName}, you have chosen to close an account.");
                 Console.WriteLine("Which account would you like to close? Please select the account number.");
-                user.ShowAccounts();
+                currentUser.ShowAccounts();
                 int closeAccount;
                 int.TryParse(Console.ReadLine(), out closeAccount);
                 // VALIDATE INPUT
-                while (!user.Accounts.Any(acc => acc.AccountNumber == closeAccount))
+                while (!currentUser.Accounts.Any(acc => acc.AccountNumber == closeAccount))
                 {
                   Console.WriteLine(errorMessage);
                   int.TryParse(Console.ReadLine(), out closeAccount);
                 }
 
                 // Make sure that account balance is = 0 before closing
-                while (user.Accounts.First(acc => acc.AccountNumber == closeAccount).Balance > 0)
+                while (currentUser.Accounts.First(acc => acc.AccountNumber == closeAccount).Balance > 0)
                 {
-                  System.Console.WriteLine($"{user.Accounts.First(acc => acc.AccountNumber == closeAccount).Name} must have a balance of 0 before you close the account.");
+                  System.Console.WriteLine($"{currentUser.Accounts.First(acc => acc.AccountNumber == closeAccount).Name} must have a balance of 0 before you close the account.");
                   System.Console.WriteLine("Would you like to withdraw the remaining amount? (YES) or (NO)");
                   System.Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                   var userInput = Console.ReadLine().ToLower();
                   // check user input
                   if (userInput == "yes")
                   {
-                    user.Withdraw(closeAccount, user.Accounts.First(acc => acc.AccountNumber == closeAccount).Balance);
+                    currentUser.Withdraw(closeAccount, currentUser.Accounts.First(acc => acc.AccountNumber == closeAccount).Balance);
                   }
                 }
                 // Call method to remove entered account
-                user.RemoveAccount(closeAccount);
+                currentUser.RemoveAccount(closeAccount);
                 // Add space
                 System.Console.WriteLine();
-                Console.WriteLine($"{user.UserName}, you have successfully closed the account.");
+                Console.WriteLine($"{currentUser.UserName}, you have successfully closed the account.");
                 // Save data to file 
                 SaveData(bank);
                 break;
@@ -288,7 +291,7 @@ namespace SuncoastBank
                   confirmNewPassword = Console.ReadLine().ToLower();
                 }
                 // Set the new password
-                user.Password = confirmNewPassword;
+                currentUser.Password = confirmNewPassword;
                 break;
             }
             break;
@@ -296,7 +299,7 @@ namespace SuncoastBank
           case "q":
             isRunning = false;
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            Console.WriteLine($"Enjoy the rest of your day, {user.UserName}. Thanks for banking with the First Bank of Suncoast!");
+            Console.WriteLine($"Enjoy the rest of your day, {currentUser.UserName}. Thanks for banking with the First Bank of Suncoast!");
             Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             // Save data to file 
             SaveData(bank);
@@ -311,5 +314,4 @@ namespace SuncoastBank
       }
     }
   }
-
 }
