@@ -18,9 +18,6 @@ namespace SuncoastBank
       Users.Add(newUser);
     }
 
-
-
-
   }
 
 }
