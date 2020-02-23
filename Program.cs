@@ -24,59 +24,81 @@ namespace SuncoastBank
     static void Main(string[] args)
     {
       var isRunning = true;
+      var loggedIn = false;
       var bank = new Bank();
       bank = JsonConvert.DeserializeObject<Bank>(File.ReadAllText(@"bankData.txt"));
-      var currentUser = bank.Users[0];
+      var currentUser = new User();
       var errorMessage = $"Apologies, that is not a valid input. Please try again.";
-      // var user = new User();
-      // user.UserName = "Sam123";
-      // user.Password = "taco123";
-      // bank.Users.Add(user);
-      // Add test cases
-      // user.AddAccount("Savings", 50.50);
-      // user.AddAccount("Checkings", 100.50);
 
-      // ask user to login or sign up
-      System.Console.WriteLine("Greetings, would you like to (LOGIN) or (SIGN UP)?");
-      // Get user input
-      var userAnswer = Console.ReadLine().ToLower();
-      while (userAnswer != "login" && userAnswer != "sign up")
+      while (isRunning)
       {
-        System.Console.WriteLine(errorMessage);
-        userAnswer = Console.ReadLine().ToLower();
-      }
-
-      if (userAnswer == "sign up")
-      {
-        System.Console.WriteLine("Thanks for choosing First Bank of Suncoast.");
-        System.Console.WriteLine("Please enter a username:");
-        var createUsername = Console.ReadLine();
-        bank.CheckUsername(createUsername);
-        System.Console.WriteLine("Please enter a password:");
-        var createPassword = Console.ReadLine();
-        bank.CreateUser(createUsername, createPassword);
-      }
-      else if (userAnswer == "login")
-      {
-        System.Console.WriteLine("Please enter your username:");
-        var username = Console.ReadLine();
-        bank.CheckUsername(username);
-        System.Console.WriteLine("Please enter your password:");
-        var password = Console.ReadLine();
-        bank.CheckPassword(username, password);
-
-        // var loggedIn = false;
-        // while (loggedIn) {
-
-        // }
-        while (isRunning)
+        // if not logged in ask to log in or sign up
+        while (!loggedIn)
         {
-          // Display different accounts to user
-          // currentUser.ShowAccounts();
-          // Ask user what they would like to do
-          Console.WriteLine("What would you like to do today?");
-          Console.WriteLine("(VIEW 'v') accounts, (DEPOSIT 'd'), (WITHDRAW 'w'), (TRANSFER 't'), (USER 'u') settings, or (QUIT 'q')");
-          var input = Console.ReadLine().ToLower();
+          // ask user to login or sign up
+          System.Console.WriteLine("Greetings, would you like to (LOGIN) or (SIGN UP)?");
+          // Get user input
+          var userAnswer = Console.ReadLine().ToLower();
+          while (userAnswer != "login" && userAnswer != "sign up")
+          {
+            System.Console.WriteLine(errorMessage);
+            userAnswer = Console.ReadLine().ToLower();
+          }
+
+          if (userAnswer == "sign up")
+          {
+            System.Console.WriteLine("Thanks for choosing First Bank of Suncoast.");
+            System.Console.WriteLine("Please enter a username:");
+            var username = Console.ReadLine();
+            // validate for username 
+            while (bank.Users.Any(user => user.UserName == username))
+            {
+              System.Console.WriteLine("Username taken, please try again.");
+              username = Console.ReadLine();
+            }
+
+            System.Console.WriteLine("Please enter a password:");
+            var password = Console.ReadLine();
+            // validate for password
+            bank.CreateUser(username, password);
+            SaveData(bank);
+          }
+          else if (userAnswer == "login")
+          {
+            // prompt for username
+            System.Console.WriteLine("Please enter your username:");
+            var username = Console.ReadLine();
+            // validate for username 
+            while (!bank.Users.Any(user => user.UserName == username))
+            {
+              System.Console.WriteLine("Username not found, please try again.");
+              username = Console.ReadLine();
+            }
+            // prompt for password
+            System.Console.WriteLine("Please enter your password:");
+            var password = Console.ReadLine();
+            // validate for password
+            while (password != bank.Users.First(user => user.UserName == username).Password)
+            {
+              System.Console.WriteLine("Incorrect password. Please try again.");
+              password = Console.ReadLine();
+            }
+            // change log in flagged to true
+            loggedIn = true;
+          }
+
+          var input = "";
+          if (!currentUser.Accounts.Any())
+          {
+            input = "u";
+          }
+          else
+          {
+            // Ask user what they would like to do
+            Console.WriteLine("What would you like to do today?");
+            Console.WriteLine("(VIEW 'v') accounts, (DEPOSIT 'd'), (WITHDRAW 'w'), (TRANSFER 't'), (USER 'u') settings, or (QUIT 'q')");
+            input = Console.ReadLine().ToLower();
+          }
           // Add space
           Console.WriteLine();
 
@@ -208,9 +230,18 @@ namespace SuncoastBank
 
             // * * * * * USER S E T T I N G S * * * * *
             case "u":
-              Console.WriteLine("What would you like to do in settings?");
-              Console.WriteLine("(ADD 'a') account, (CLOSE 'x') account, (CHANGE 'c') password, or (SIGN OUT 's')");
-              var answer = Console.ReadLine().ToLower();
+              var answer = "";
+              if (!currentUser.Accounts.Any())
+              {
+                answer = "a";
+              }
+              else
+              {
+                Console.WriteLine("What would you like to do in settings?");
+                Console.WriteLine("(ADD 'a') account, (CLOSE 'x') account, (CHANGE 'c') password, or (SIGN OUT 's')");
+                answer = Console.ReadLine().ToLower();
+              }
+
               while (answer != "a" && answer != "x" && answer != "c")
               {
                 Console.WriteLine(errorMessage);
@@ -223,7 +254,6 @@ namespace SuncoastBank
                 case "a":
                   // Add space
                   System.Console.WriteLine();
-                  Console.WriteLine($"{currentUser.UserName}, you have chosen to add an account.");
                   Console.WriteLine("What type of account would you like to add?");
                   Console.WriteLine("(CHECKINGS) or (SAVINGS)?");
                   var newAccount = Console.ReadLine().ToUpper();
