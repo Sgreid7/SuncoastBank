@@ -63,6 +63,8 @@ namespace SuncoastBank
             var password = Console.ReadLine();
             // validate for password
             bank.CreateUser(username, password);
+            // Set new current user
+            currentUser = bank.Users.First(user => user.UserName == username);
             SaveData(bank);
           }
           else if (userAnswer == "login")
@@ -266,7 +268,7 @@ namespace SuncoastBank
                   Console.WriteLine("(Checkings 'c') or (Savings 's')?");
                   var newAccount = Console.ReadLine().ToLower();
                   // Validate that newAccount answer
-                  while (newAccount != "c" && newAccount != "c")
+                  while (newAccount != "c" && newAccount != "s")
                   {
                     Console.WriteLine(errorMessage);
                     newAccount = Console.ReadLine().ToLower();
@@ -285,14 +287,15 @@ namespace SuncoastBank
                   // CHECK USER ANSWER
                   if (newAccount == "c")
                   {
-                    newAccount = "checkings";
+                    // create the account
+                    currentUser.AddAccount(newAccount, amount);
                   }
                   else if (newAccount == "s")
                   {
-                    newAccount = "savings";
+                    // create the account
+                    currentUser.AddAccount(newAccount, amount);
                   }
-                  // create the account
-                  currentUser.AddAccount(newAccount, amount);
+
                   // Save data to file 
                   SaveData(bank);
                   break;
